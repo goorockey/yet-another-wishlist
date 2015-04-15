@@ -3,7 +3,7 @@ var WishItem = React.createClass({
     console.log(this.props);
     return (
       <div className="col-md-4" key={this.props.item.id}>
-        <p>{this.props.item.attributes.description}</p>
+        <p>{this.props.item.get('description')}</p>
       </div>
     );
   },
@@ -13,7 +13,7 @@ var WishList = React.createClass({
   render: function() {
     var wishItem = this.props.wishlist.map(function(item) {
       return (
-        <WishItem ikey={item.id} item={item} />
+        <WishItem key={item.id} item={item} />
       );
     }.bind(this));
 
@@ -27,6 +27,19 @@ var WishList = React.createClass({
   },
 });
 
+var NavBar = React.createClass({
+  render: function() {
+    return (
+      <nav className="navbar navbar-default">
+        <div className="container-fluid">
+          <div className="navbar-header">
+            <h1>Yet Another Wishlist</h1>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+});
 
 var App = React.createClass({
   getInitialState: function() {
@@ -57,8 +70,11 @@ var App = React.createClass({
   },
   render: function() {
     return (
-      <div className="container">
-        <WishList wishlist={this.state.wishlist} />
+      <div>
+        <NavBar />
+        <div className="container">
+          <WishList wishlist={this.state.wishlist} />
+        </div>
       </div>
     );
   },
