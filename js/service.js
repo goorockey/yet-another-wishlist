@@ -9,6 +9,7 @@ var dataService = (function() {
     getWishItems: function(page, callback) {
       var query = new AV.Query(Wish);
       query.skip(itemPerPage * page).limit(itemPerPage);
+      query.descending("createdAt");
       query.find().then(function(items) {
         callback(null, items);
       }, function(err) {

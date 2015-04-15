@@ -2,9 +2,19 @@ var WishItem = React.createClass({
   render: function() {
     console.log(this.props);
     return (
-      <div className="well">
+      <div className="well wish-item">
+        <div className="pull-right">
+          <div>
+            <i className="mdi-action-today"></i>
+            <span className="text-muted">{this.props.item.createdAt.toDateString()}</span>
+          </div>
+          <div>
+            <i className="mdi-social-person"></i>
+            <span className="text-muted">author</span>
+          </div>
+        </div>
         <a href="#">
-          <p>{this.props.item.get('description')}</p>
+          <h3>{this.props.item.get('description')}</h3>
         </a>
       </div>
     );
