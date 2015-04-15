@@ -2,8 +2,10 @@ var WishItem = React.createClass({
   render: function() {
     console.log(this.props);
     return (
-      <div className="col-md-4" key={this.props.item.id}>
-        <p>{this.props.item.get('description')}</p>
+      <div className="well">
+        <a href="#">
+          <p>{this.props.item.get('description')}</p>
+        </a>
       </div>
     );
   },
@@ -19,7 +21,7 @@ var WishList = React.createClass({
 
     return (
       <div className="wish-list">
-        <div className="row">
+        <div className="list-group">
           {wishItem}
         </div>
       </div>
@@ -49,6 +51,7 @@ var App = React.createClass({
     }
   },
   componentDidMount: function() {
+    $.material.init();
     this.getWishItems();
   },
   getWishItems: function() {
