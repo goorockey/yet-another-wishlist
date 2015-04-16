@@ -39,6 +39,10 @@ var dataService = (function() {
           callback(err);
       });
     },
+
+    voteUpItem: function(id, callback) {
+      callback();
+    },
   };
 
 }());

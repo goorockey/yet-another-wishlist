@@ -1,8 +1,42 @@
 var WishItem = React.createClass({
+  getInitialState: function() {
+    return {
+      voteUpCount: this.props.item.get('voteup'),
+      voteUpAlready: false,
+    };
+  },
+  handleVoteUp: function(e) {
+    if (this.state.voteUpAlready) {
+      return;
+    }
+
+    dataService.voteUpItem(this.props.item.id, function(err, voteUpAlready) {
+      if (err) {
+        return;
+      }
+
+      if (voteUpAlready) {
+        return;
+      }
+
+      this.setState({
+        voteUpCount: this.state.voteUpCount + 1,
+        voteUpAlready: true,
+      });
+    }.bind(this));
+  },
   render: function() {
     return (
-      <div className="well wish-item">
-        <div className="pull-right">
+      <div className="well wish-item row">
+        <div className="col-md-1 wish-item-voteup">
+          <a href="javascript:void(0)" onClick={this.handleVoteUp}
+             className={ "btn btn-flat" + (this.state.voteUpAlready ? " disabled" : "") }>
+            <i className="mdi-navigation-arrow-drop-up"></i>
+            <p className="text-center">{this.state.voteUpCount}</p>
+          </a>
+        </div>
+        <p className="col-md-9 wish-item-description">{this.props.item.get('description')}</p>
+        <div className="col-md-2">
           <div>
             <i className="mdi-action-today"></i>
             <span className="text-muted">{this.props.item.createdAt.toDateString()}</span>
@@ -12,9 +46,6 @@ var WishItem = React.createClass({
             <span className="text-muted">author</span>
           </div>
         </div>
-        <a href="#">
-          <p className="wish-item-description">{this.props.item.get('description')}</p>
-        </a>
       </div>
     );
   },
@@ -43,7 +74,7 @@ var NavBar = React.createClass({
         <div className="container-fluid">
           <div className="navbar-header">
             <a href="#" className="navbar-brand">
-              <h1>Yet Another Wishlist</h1>
+              <h3 id="label-brand">Yet Another Wishlist</h3>
             </a>
           </div>
           <div className="nav navbar-nav navbar-right">

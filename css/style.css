@@ -1,8 +1,17 @@
-.navbar-brand h1 {
+#label-brand {
   margin: 0px;
 }
 
 .wish-item-description {
   margin: 15px 0px;
-  font-size: 25px;
+  font-size: 20px;
+}
+
+.wish-item-voteup p {
+  width: 24px;
+}
+
+.wish-item-voteup > a {
+  margin: 0px;
+  padding: 0px;
 }
