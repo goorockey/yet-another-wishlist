@@ -142,7 +142,7 @@ var App = React.createClass({
     });
   },
   handleGetMore: function() {
-    this.setState({ page: this.state.page + 1 }, this.getWishItem);
+    this.setState({ page: this.state.page + 1 }, this.getWishItems);
   },
   render: function() {
     return (
