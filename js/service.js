@@ -29,6 +29,16 @@ var dataService = (function() {
         }
       );
     },
+
+    postNewWishItem: function(item, callback) {
+      var wish = new Wish();
+      wish.save(item).then(function(item) {
+          callback(null, item);
+      }, function(err) {
+          alert("Error: " + error.code + " " + error.message);
+          callback(err);
+      });
+    },
   };
 
 }());

@@ -1,6 +1,5 @@
 var WishItem = React.createClass({
   render: function() {
-    console.log(this.props);
     return (
       <div className="well wish-item">
         <div className="pull-right">
@@ -14,7 +13,7 @@ var WishItem = React.createClass({
           </div>
         </div>
         <a href="#">
-          <h3>{this.props.item.get('description')}</h3>
+          <p className="wish-item-description">{this.props.item.get('description')}</p>
         </a>
       </div>
     );
@@ -31,9 +30,7 @@ var WishList = React.createClass({
 
     return (
       <div className="wish-list">
-        <div className="list-group">
-          {wishItem}
-        </div>
+        {wishItem}
       </div>
     );
   },
@@ -45,10 +42,62 @@ var NavBar = React.createClass({
       <nav className="navbar navbar-default">
         <div className="container-fluid">
           <div className="navbar-header">
-            <h1>Yet Another Wishlist</h1>
+            <a href="#" className="navbar-brand">
+              <h1>Yet Another Wishlist</h1>
+            </a>
+          </div>
+          <div className="nav navbar-nav navbar-right">
+            <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button>
           </div>
         </div>
       </nav>
+    );
+  }
+});
+
+var NewWishDialog = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+
+    var description = React.findDOMNode(this.refs.description).value.trim();
+    if (!description) {
+      return;
+    }
+
+    dataService.postNewWishItem({description: description}, function(err, item) {
+      if (err) {
+        // TODO: show error toast
+        console.log('error');
+        return;
+      }
+
+      this.props.onNewWish(item);
+    }.bind(this));
+
+    React.findDOMNode(this.refs.description).value = '';
+    return;
+  },
+  render: function() {
+    return (
+      <div className="modal fade" id="dlg-new-wish" role="dialog" aria-hidden="true">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <form className="form-horizontal" method="POST" action="#" onSubmit={this.handleSubmit}>
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 className="modal-title">New Wish</h3>
+              </div>
+              <div className="modal-body">
+                <textarea className="form-control" rows="10" ref="description" placeholder="Enter your wish"></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" className="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     );
   }
 });
@@ -81,6 +130,11 @@ var App = React.createClass({
   next: function() {
     this.setState({page: this.state.page + 1}, this.getWishItem);
   },
+  handleNewWish: function(item) {
+    this.setState({
+      wishlist: [item].concat(this.state.wishlist)
+    });
+  },
   render: function() {
     return (
       <div>
@@ -88,6 +142,7 @@ var App = React.createClass({
         <div className="container">
           <WishList wishlist={this.state.wishlist} />
         </div>
+        <NewWishDialog onNewWish={this.handleNewWish}/>
       </div>
     );
   },
