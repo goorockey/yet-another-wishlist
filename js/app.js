@@ -102,11 +102,20 @@ var NewWishDialog = React.createClass({
   }
 });
 
+var MoreBtn = React.createClass({
+  render: function() {
+    return (
+      <button type="button" className="btn btn-default btn-block btn-raised" onClick={this.props.onGetMore}>More</button>
+    );
+  }
+});
+
 var App = React.createClass({
   getInitialState: function() {
     return {
       wishlist: [],
-      page: 0
+      page: 0,
+      hasMore: true,
     }
   },
   componentDidMount: function() {
@@ -118,7 +127,7 @@ var App = React.createClass({
       if (err) { return; }
 
       if (!items || items.length === 0) {
-        // TODO: disable inifinite scrolling
+        this.setState({ hasMore: false });
         return;
       }
 
@@ -127,13 +136,13 @@ var App = React.createClass({
       });
     }.bind(this));
   },
-  next: function() {
-    this.setState({page: this.state.page + 1}, this.getWishItem);
-  },
   handleNewWish: function(item) {
     this.setState({
       wishlist: [item].concat(this.state.wishlist)
     });
+  },
+  handleGetMore: function() {
+    this.setState({ page: this.state.page + 1 }, this.getWishItem);
   },
   render: function() {
     return (
@@ -141,8 +150,9 @@ var App = React.createClass({
         <NavBar />
         <div className="container">
           <WishList wishlist={this.state.wishlist} />
+          { this.state.hasMore ? <MoreBtn onGetMore={this.handleGetMore} /> : null }
         </div>
-        <NewWishDialog onNewWish={this.handleNewWish}/>
+        <NewWishDialog onNewWish={this.handleNewWish} />
       </div>
     );
   },
