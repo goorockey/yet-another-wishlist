@@ -5,6 +5,8 @@
 .wish-item-description {
   margin: 15px 0px;
   font-size: 20px;
+  word-wrap: break-word; 
+  word-break: normal;
 }
 
 .wish-item-voteup p {
@@ -14,4 +16,16 @@
 .wish-item-voteup > a {
   margin: 0px;
   padding: 0px;
+}
+
+.modal-body {
+  margin-top: 20px;
+}
+
+.wish-item-metadata > * {
+  margin: 5px;
+}
+
+.wish-item-metadata i {
+  vertical-align: middle;
 }

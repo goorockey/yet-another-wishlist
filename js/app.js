@@ -6,7 +6,7 @@ var WishItem = React.createClass({
     };
   },
   handleVoteUp: function(e) {
-    if (this.state.voteUpAlready) {
+    if (!dataService.getUser() || this.state.voteUpAlready) {
       return;
     }
 
@@ -15,12 +15,8 @@ var WishItem = React.createClass({
         return;
       }
 
-      if (voteUpAlready) {
-        return;
-      }
-
       this.setState({
-        voteUpCount: this.state.voteUpCount + 1,
+        voteUpCount: voteUpAlready ? this.state.voteUpCount : this.state.voteUpCount + 1,
         voteUpAlready: true,
       });
     }.bind(this));
@@ -30,20 +26,22 @@ var WishItem = React.createClass({
       <div className="well wish-item row">
         <div className="col-md-1 wish-item-voteup">
           <a href="javascript:void(0)" onClick={this.handleVoteUp}
-             className={ "btn btn-flat" + (this.state.voteUpAlready ? " disabled" : "") }>
+             className={ "btn btn-flat" + (!dataService.getUser() || this.state.voteUpAlready ? " disabled" : " btn-primary") }>
             <i className="mdi-navigation-arrow-drop-up"></i>
             <p className="text-center">{this.state.voteUpCount}</p>
           </a>
         </div>
-        <p className="col-md-9 wish-item-description">{this.props.item.get('description')}</p>
-        <div className="col-md-2">
+        <div className="col-md-9 wish-item-description">
+          <p>{this.props.item.get('description')}</p>
+        </div>
+        <div className="col-md-2 wish-item-metadata">
           <div>
             <i className="mdi-action-today"></i>
             <span className="text-muted">{this.props.item.createdAt.toDateString()}</span>
           </div>
           <div>
             <i className="mdi-social-person"></i>
-            <span className="text-muted">author</span>
+            <span className="text-muted">{this.props.item.author.getUsername()}</span>
           </div>
         </div>
       </div>
@@ -74,7 +72,7 @@ var NavBar = React.createClass({
       <nav className="navbar navbar-default">
         <div className="container-fluid">
           <div className="navbar-header">
-            <a href="#" className="navbar-brand">
+            <a href="javascript:void(0)" className="navbar-brand">
               <h3 id="label-brand">Yet Another Wishlist</h3>
             </a>
           </div>
@@ -94,6 +92,7 @@ var RegisterDialog = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     if (dataService.getUser()) {
+      $('#dlg-register').modal('hide');
       return;
     }
 
@@ -122,13 +121,15 @@ var RegisterDialog = React.createClass({
     React.findDOMNode(this.refs.email).value = '';
     React.findDOMNode(this.refs.password).value = '';
     React.findDOMNode(this.refs.password_confirm).value = '';
+
+    $('#dlg-register').modal('hide');
   },
   render: function() {
     return (
       <div className="modal fade" id="dlg-register" role="dialog" aria-hidden="true">
         <div className="modal-dialog">
           <div className="modal-content">
-            <form className="form-horizontal" onSubmit={this.handleSubmit}>
+            <form className="form" onSubmit={this.handleSubmit}>
               <div className="modal-header">
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h3 className="modal-title">Register</h3>
@@ -163,6 +164,7 @@ var LoginDialog = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     if (dataService.getUser()) {
+      $('#dlg-login').modal('hide');
       return;
     }
 
@@ -179,17 +181,19 @@ var LoginDialog = React.createClass({
       }
 
       this.props.onLogin();
+
     }.bind(this));
 
     React.findDOMNode(this.refs.email).value = '';
     React.findDOMNode(this.refs.password).value = '';
+    $('#dlg-login').modal('hide');
   },
   render: function() {
     return (
       <div className="modal fade" id="dlg-login" role="dialog" aria-hidden="true">
         <div className="modal-dialog">
           <div className="modal-content">
-            <form className="form-horizontal" onSubmit={this.handleSubmit}>
+            <form className="form" onSubmit={this.handleSubmit}>
               <div className="modal-header">
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h3 className="modal-title">Login</h3>
@@ -221,6 +225,7 @@ var NewWishDialog = React.createClass({
     e.preventDefault();
 
     if (!dataService.getUser()) {
+      $('#dlg-new-wish').modal('hide');
       return;
     }
 
@@ -241,22 +246,25 @@ var NewWishDialog = React.createClass({
       }
 
       this.props.onNewWish(item);
+
+
     }.bind(this));
 
     React.findDOMNode(this.refs.description).value = '';
+    $('#dlg-new-wish').modal('hide');
   },
   render: function() {
     return (
       <div className="modal fade" id="dlg-new-wish" role="dialog" aria-hidden="true">
         <div className="modal-dialog">
           <div className="modal-content">
-            <form className="form-horizontal" onSubmit={this.handleSubmit}>
+            <form className="form" onSubmit={this.handleSubmit}>
               <div className="modal-header">
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h3 className="modal-title">New Wish</h3>
               </div>
               <div className="modal-body">
-                <textarea className="form-control" rows="10" ref="description" placeholder="Enter your wish"></textarea>
+                <textarea className="form-control" rows="10" ref="description" placeholder="Enter your wish here"></textarea>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
