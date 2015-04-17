@@ -21,10 +21,8 @@ var WishItem = React.createClass({
       });
     }.bind(this));
   },
-  handleEditWish: function() {
-
-  },
   render: function() {
+    var isAuthor = dataService.getUser() && (this.props.item.author.getUsername() === dataService.getUser().getUsername());
     return (
       <div className="well wish-item row">
         <div className="col-md-1 wish-item-voteup">
@@ -47,7 +45,8 @@ var WishItem = React.createClass({
             <span className="text-muted">{this.props.item.author.getUsername()}</span>
           </div>
           <div>
-            <a className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.handleEditWish}></a>
+            { !isAuthor ? null : <a className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.props.onEditWish.bind(null, this.props.item)}></a> }
+            { !isAuthor ? null : <a className="btn btn-flat mdi-content-clear btn-del-wish" onClick={this.props.onDelWish.bind(null, this.props.item)}></a> }
           </div>
         </div>
       </div>
@@ -59,7 +58,7 @@ var WishList = React.createClass({
   render: function() {
     var wishItem = this.props.wishlist.map(function(item) {
       return (
-        <WishItem key={item.id} item={item} />
+        <WishItem key={item.id} item={item} onEditWish={this.props.onEditWish} onDelWish={this.props.onDelWish}/>
       );
     }.bind(this));
 
@@ -106,18 +105,17 @@ var RegisterDialog = React.createClass({
     var password = React.findDOMNode(this.refs.password).value.trim();
     var password_confirm = React.findDOMNode(this.refs.password_confirm).value.trim();
     if (!email || !password || !password_confirm) {
-      // TODO: alert
+      alert('Neither email or password is allowed to be empty.');
       return;
     }
 
     if (password != password_confirm) {
-      // TODO: alert
+      alert('Passwords are not equal.');
       return;
     }
 
     dataService.register(email, password, function(err, user) {
       if (err || !user) {
-        // TODO: alert
         return;
       }
 
@@ -182,7 +180,6 @@ var LoginDialog = React.createClass({
 
     dataService.login(email, password, function(err, user) {
       if (err || !user) {
-        // TODO: alert
         return;
       }
 
@@ -237,7 +234,7 @@ var NewWishDialog = React.createClass({
 
     var description = React.findDOMNode(this.refs.description).value.trim();
     if (!description) {
-      // TODO: alert
+      alert('Empty description is not allowed');
       return;
     }
 
@@ -285,35 +282,38 @@ var NewWishDialog = React.createClass({
 var EditWishDialog = React.createClass({
   getInitialState: function() {
     return {
-      item: null
+      item: null,
+      description: '',
     };
   },
   handleSubmit: function(e) {
     e.preventDefault();
 
-    if (!dataService.getUser()) {
+    if (!dataService.getUser() || !this.state.item) {
       $('#dlg-edit-wish').modal('hide');
       return;
     }
 
     var description = React.findDOMNode(this.refs.description).value.trim();
     if (!description) {
-      // TODO: alert
+      alert('Empty description is not allowed');
       return;
     }
 
-    dataService.updateWishItem(this.state.item, 
-      description, function(err) {
+    dataService.updateWishItem(this.state.item, description, function(err) {
       if (err) {
         return;
       }
 
       this.props.onEditWish();
-
     }.bind(this));
 
     React.findDOMNode(this.refs.description).value = '';
     $('#dlg-edit-wish').modal('hide');
+  },
+  handleChangeDescription: function() {
+    var description = React.findDOMNode(this.refs.description).value.trim();
+    this.setState({description: description});
   },
   render: function() {
     return (
@@ -323,10 +323,10 @@ var EditWishDialog = React.createClass({
             <form className="form" onSubmit={this.handleSubmit}>
               <div className="modal-header">
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h3 className="modal-title">Eidt Wish</h3>
+                <h3 className="modal-title">Edit Wish</h3>
               </div>
               <div className="modal-body">
-                <textarea className="form-control" rows="10" ref="description" placeholder="Enter your wish here" value={this.state.item ? this.state.item.get('description') : ''}></textarea>
+                <textarea className="form-control" rows="10" ref="description" placeholder="Enter your wish here" value={this.state.description} onChange={this.handleChangeDescription}></textarea>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
@@ -340,6 +340,54 @@ var EditWishDialog = React.createClass({
   }
 });
 
+var DelWishDialog = React.createClass({
+  getInitialState: function() {
+    return {
+      item: null
+    };
+  },
+  handleSubmit: function(e) {
+    e.preventDefault();
+
+    if (!dataService.getUser() || !this.state.item) {
+      $('#dlg-del-wish').modal('hide');
+      return;
+    }
+
+    dataService.deleteWishItem(this.state.item, function(err) {
+      if (err) {
+        return;
+      }
+
+      this.props.onDelWish(this.state.item);
+    }.bind(this));
+
+    $('#dlg-del-wish').modal('hide');
+  },
+  render: function() {
+    return (
+      <div className="modal fade" id="dlg-del-wish" role="dialog" aria-hidden="true">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <form className="form" onSubmit={this.handleSubmit}>
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 className="modal-title">Delete Wish</h3>
+              </div>
+              <div className="modal-body">
+                <p>Delete this wish?</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" className="btn btn-primary">Confirm</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+});
 
 var MoreBtn = React.createClass({
   render: function() {
@@ -377,12 +425,28 @@ var App = React.createClass({
     }.bind(this));
   },
   handleNewWish: function(item) {
-    this.setState({
-      wishlist: [item].concat(this.state.wishlist)
-    });
+    this.setState({ wishlist: [item].concat(this.state.wishlist) });
   },
-  handleEditWish: function() {
-    this.forceUpdate();
+  handleEditWish: function(item) {
+    this.refs.dlg_edit_wish.setState({
+      item: item,
+      description: item.get('description'),
+    });
+
+    var dlg = React.findDOMNode(this.refs.dlg_edit_wish);
+    $(dlg).modal('show');
+  },
+  handleDelWish: function(item) {
+    this.refs.dlg_del_wish.setState({ item: item });
+    var dlg = React.findDOMNode(this.refs.dlg_del_wish);
+    $(dlg).modal('show');
+  },
+  doDelWish: function(item) {
+    var index = this.state.wishlist.indexOf(item);
+    if (index > -1) {
+      this.state.wishlist.splice(index, 1);
+      this.forceUpdate();
+    }
   },
   handleGetMore: function() {
     this.setState({ page: this.state.page + 1 }, this.getWishItems);
@@ -391,24 +455,19 @@ var App = React.createClass({
     dataService.logout();
     this.forceUpdate();
   },
-  handleRegister: function() {
-    this.forceUpdate();
-  },
-  handleLogin: function() {
-    this.forceUpdate();
-  },
   render: function() {
     return (
       <div>
         <NavBar onLogout={this.handleLogout} />
         <div className="container">
-          <WishList wishlist={this.state.wishlist} />
+          <WishList wishlist={this.state.wishlist} onEditWish={this.handleEditWish} onDelWish={this.handleDelWish} />
           { this.state.hasMore ? <MoreBtn onGetMore={this.handleGetMore} /> : null }
         </div>
-        <RegisterDialog onRegister={this.handleRegister} />
-        <LoginDialog onLogin={this.handleLogin} />
+        <RegisterDialog onRegister={this.forceUpdate.bind(this)} />
+        <LoginDialog onLogin={this.forceUpdate.bind(this)} />
         <NewWishDialog onNewWish={this.handleNewWish} />
-        <EditWishDialog onEditWish={this.handleEditWish} />
+        <EditWishDialog ref="dlg_edit_wish" onEditWish={this.forceUpdate.bind(this)} />
+        <DelWishDialog ref="dlg_del_wish" onDelWish={this.doDelWish} />
       </div>
     );
   },

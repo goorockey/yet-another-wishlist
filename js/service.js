@@ -82,6 +82,16 @@ var dataService = (function() {
       });
     },
 
+    deleteWishItem: function(item, callback) {
+      item.destroy()
+      .then(function() {
+        callback();
+      }, function(err) {
+        onError(err);
+        callback(err);
+      });
+    },
+
     voteUpItem: function(item, callback) {
       item.increment('voteup');
       item.save()
