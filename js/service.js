@@ -9,6 +9,12 @@ var dataService = (function() {
   AV.initialize(appId, appKey);
 
   var Wish = AV.Object.extend("Wish");
+  var Vote = AV.Object.extend("Vote");
+  var Comment = AV.Object.extend("Comment");
+
+  var getUser = function() {
+    return AV.User.current();
+  };
 
   return {
     getWishItems: function(page, callback) {
@@ -28,7 +34,7 @@ var dataService = (function() {
 
         wishitems = items;
         var promises = [];
-        items.forEach(function(item) {
+        wishitems.forEach(function(item) {
           var author = item.get('author');
           promises.push(author.fetch());
         });
@@ -39,9 +45,28 @@ var dataService = (function() {
           wishitems[i].author = authors[i];
         }
 
-        callback(null, wishitems, hasMore);
+        if (!getUser()) {
+          return callback(null, wishitems);
+        }
 
-      }, function(err) {
+        var promises = [];
+        wishitems.forEach(function(item) {
+          var query = new AV.Query(Vote);
+          query.equalTo('user', getUser())
+          .equalTo('wish', item);
+          promises.push(query.count());
+        });
+
+        return AV.Promise.when(promises).then(function() {
+          var votes = arguments;
+          for (var i = 0; i < votes.length; i++) {
+            wishitems[i].voteUpAlready = (votes[i] > 0);
+          }
+
+          callback(null, wishitems, hasMore);
+        });
+
+      }).fail(function(err) {
         onError(err);
         callback(err);
       });
@@ -54,7 +79,7 @@ var dataService = (function() {
       .first()
       .then(function(item) {
         callback(null, item);
-      }, function(err) {
+      }).fail(function(err) {
         onError(err);
         callback(err);
       }
@@ -96,11 +121,27 @@ var dataService = (function() {
     },
 
     voteUpItem: function(item, callback) {
-      item.increment('voteup');
-      item.save()
-      .then(function() {
-        callback();
-      }, function(err) {
+      var query = new AV.Query(Vote);
+      query.equalTo('user', getUser())
+      .equalTo('wish', item)
+      .count()
+      .then(function(count) {
+        if (count > 0) {
+          return callback(null, true);
+        }
+
+        var vote = new Vote();
+        return vote.save({
+          user: getUser(),
+          wish: item,
+        }).then(function() {
+          item.increment('voteup');
+          return item.save()
+        }).then(function() {
+          callback();
+        });
+
+      }).fail(function(err) {
         onError(err);
         callback(err);
       });
@@ -130,9 +171,7 @@ var dataService = (function() {
       AV.User.logOut();
     },
 
-    getUser: function() {
-      return AV.User.current();
-    },
+    getUser: getUser,
   };
 
 }());

@@ -2,7 +2,7 @@ var WishItem = React.createClass({
   getInitialState: function() {
     return {
       voteUpCount: this.props.item.get('voteup') || 0,
-      voteUpAlready: false,
+      voteUpAlready: this.props.item.voteUpAlready || false,
     };
   },
   handleVoteUp: function(e) {
@@ -10,7 +10,7 @@ var WishItem = React.createClass({
       return;
     }
 
-    dataService.voteUpItem(this.props.item.id, function(err, voteUpAlready) {
+    dataService.voteUpItem(this.props.item, function(err, voteUpAlready) {
       if (err) {
         return;
       }
@@ -86,6 +86,7 @@ var NavBar = React.createClass({
           { user ? null : <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-login">Login</button></li> }
           { !user ? null : <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button></li> }
           { !user ? null : <li><button type="button" className="btn btn-primary" onClick={this.props.onLogout}>Logout</button></li> }
+          { !user ? null : <li><div id="box-user"><i className="mdi-social-person"></i><span>{user.getUsername()}</span></div></li> }
           </ul>
         </div>
       </nav>
