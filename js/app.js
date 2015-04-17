@@ -1,7 +1,7 @@
 var WishItem = React.createClass({
   getInitialState: function() {
     return {
-      voteUpCount: this.props.item.get('voteup'),
+      voteUpCount: this.props.item.get('voteup') || 0,
       voteUpAlready: false,
     };
   },
@@ -247,8 +247,6 @@ var NewWishDialog = React.createClass({
       }
 
       this.props.onNewWish(item);
-
-
     }.bind(this));
 
     React.findDOMNode(this.refs.description).value = '';

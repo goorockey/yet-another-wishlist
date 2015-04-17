@@ -62,11 +62,15 @@ var dataService = (function() {
       );
     },
 
-    postNewWishItem: function(item, callback) {
+    postNewWishItem: function(item_new, callback) {
       var wish = new Wish();
-      wish.save(item).then(function(item) {
-        callback(null, item);
-      }, function(err) {
+      wish.save(item_new).then(function(item) {
+        var author = item.get('author');
+        return author.fetch().then(function(author) {
+          item.author = author;
+          callback(null, item);
+        });
+      }).fail(function(err) {
         onError(err);
         callback(err);
       });
