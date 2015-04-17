@@ -21,6 +21,9 @@ var WishItem = React.createClass({
       });
     }.bind(this));
   },
+  handleEditWish: function() {
+
+  },
   render: function() {
     return (
       <div className="well wish-item row">
@@ -42,6 +45,9 @@ var WishItem = React.createClass({
           <div>
             <i className="mdi-social-person"></i>
             <span className="text-muted">{this.props.item.author.getUsername()}</span>
+          </div>
+          <div>
+            <a className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.handleEditWish}></a>
           </div>
         </div>
       </div>
@@ -240,8 +246,6 @@ var NewWishDialog = React.createClass({
       description: description,
     }, function(err, item) {
       if (err) {
-        // TODO: alert
-        console.log('error');
         return;
       }
 
@@ -277,6 +281,65 @@ var NewWishDialog = React.createClass({
     );
   }
 });
+
+var EditWishDialog = React.createClass({
+  getInitialState: function() {
+    return {
+      item: null
+    };
+  },
+  handleSubmit: function(e) {
+    e.preventDefault();
+
+    if (!dataService.getUser()) {
+      $('#dlg-edit-wish').modal('hide');
+      return;
+    }
+
+    var description = React.findDOMNode(this.refs.description).value.trim();
+    if (!description) {
+      // TODO: alert
+      return;
+    }
+
+    dataService.updateWishItem(this.state.item, 
+      description, function(err) {
+      if (err) {
+        return;
+      }
+
+      this.props.onEditWish();
+
+    }.bind(this));
+
+    React.findDOMNode(this.refs.description).value = '';
+    $('#dlg-edit-wish').modal('hide');
+  },
+  render: function() {
+    return (
+      <div className="modal fade" id="dlg-edit-wish" role="dialog" aria-hidden="true">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <form className="form" onSubmit={this.handleSubmit}>
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 className="modal-title">Eidt Wish</h3>
+              </div>
+              <div className="modal-body">
+                <textarea className="form-control" rows="10" ref="description" placeholder="Enter your wish here" value={this.state.item ? this.state.item.get('description') : ''}></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" className="btn btn-primary">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+});
+
 
 var MoreBtn = React.createClass({
   render: function() {
@@ -318,6 +381,9 @@ var App = React.createClass({
       wishlist: [item].concat(this.state.wishlist)
     });
   },
+  handleEditWish: function() {
+    this.forceUpdate();
+  },
   handleGetMore: function() {
     this.setState({ page: this.state.page + 1 }, this.getWishItems);
   },
@@ -342,6 +408,7 @@ var App = React.createClass({
         <RegisterDialog onRegister={this.handleRegister} />
         <LoginDialog onLogin={this.handleLogin} />
         <NewWishDialog onNewWish={this.handleNewWish} />
+        <EditWishDialog onEditWish={this.handleEditWish} />
       </div>
     );
   },

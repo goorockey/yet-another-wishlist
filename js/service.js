@@ -72,7 +72,7 @@ var dataService = (function() {
       });
     },
 
-    updateWishItemDescription: function(item, description, callback) {
+    updateWishItem: function(item, description, callback) {
       item.save({ description: description })
       .then(function() {
         callback();
