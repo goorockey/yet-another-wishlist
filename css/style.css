@@ -2,6 +2,11 @@
   margin: 0px;
 }
 
+.wish-item {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
 .wish-item-description {
   margin: 15px 0px;
   font-size: 20px;

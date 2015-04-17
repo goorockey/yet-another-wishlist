@@ -408,7 +408,7 @@ var App = React.createClass({
     this.getWishItems();
   },
   getWishItems: function() {
-    dataService.getWishItems(this.state.page, function(err, items, sum) {
+    dataService.getWishItems(this.state.page, function(err, items, hasMore) {
       if (err) { return; }
 
       if (!items || items.length === 0) {
@@ -417,7 +417,7 @@ var App = React.createClass({
       }
 
       this.setState({
-        hasMore: (this.state.page + 1) * itemPerPage < sum,
+        hasMore: hasMore,
         wishlist: this.state.wishlist.concat(items),
       });
     }.bind(this));

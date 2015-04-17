@@ -12,21 +12,20 @@ var dataService = (function() {
 
   return {
     getWishItems: function(page, callback) {
-      var query_sum = new AV.Query(Wish);
       var wishitems = null;
-      var wishItemSum = 0;
+      var hasMore = false;
+      var query = new AV.Query(Wish);
 
-      query_sum.count()
-      .then(function(count) {
-        wishItemSum = count;
+      query.skip(itemPerPage * page)
+      .limit(itemPerPage + 1)
+      .descending("createdAt")
+      .find()
+      .then(function(items) {
+        if (items.length > itemPerPage) {
+          hasMore = true;
+          items.splice(itemPerPage);
+        }
 
-        var query = new AV.Query(Wish);
-
-        return query.skip(itemPerPage * page)
-        .limit(itemPerPage)
-        .descending("createdAt")
-        .find();
-      }).then(function(items) {
         wishitems = items;
         var promises = [];
         items.forEach(function(item) {
@@ -40,7 +39,7 @@ var dataService = (function() {
           wishitems[i].author = authors[i];
         }
 
-        callback(null, wishitems, wishItemSum);
+        callback(null, wishitems, hasMore);
 
       }, function(err) {
         onError(err);
