@@ -299,7 +299,7 @@ var App = React.createClass({
     this.getWishItems();
   },
   getWishItems: function() {
-    dataService.getWishItems(this.state.page, function(err, items) {
+    dataService.getWishItems(this.state.page, function(err, items, sum) {
       if (err) { return; }
 
       if (!items || items.length === 0) {
@@ -308,7 +308,8 @@ var App = React.createClass({
       }
 
       this.setState({
-        wishlist: this.state.wishlist.concat(items)
+        hasMore: (this.state.page + 1) * itemPerPage < sum,
+        wishlist: this.state.wishlist.concat(items),
       });
     }.bind(this));
   },

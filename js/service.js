@@ -1,8 +1,8 @@
 var dataService = (function() {
 
-  var onError = function(error) {
-    console.log("Error: " + error.code + " " + error.message);
-    alert("Error: " + error.message);
+  var onError = function(err) {
+    console.log("Error: " + err.code + " " + err.message);
+    alert("Error: " + err.message);
   };
 
   AV.$ = jQuery;
@@ -12,14 +12,21 @@ var dataService = (function() {
 
   return {
     getWishItems: function(page, callback) {
-      var query = new AV.Query(Wish);
+      var query_sum = new AV.Query(Wish);
       var wishitems = null;
+      var wishItemSum = 0;
 
-      query.skip(itemPerPage * page)
-      .limit(itemPerPage)
-      .descending("createdAt")
-      .find()
-      .then(function(items) {
+      query_sum.count()
+      .then(function(count) {
+        wishItemSum = count;
+
+        var query = new AV.Query(Wish);
+
+        return query.skip(itemPerPage * page)
+        .limit(itemPerPage)
+        .descending("createdAt")
+        .find();
+      }).then(function(items) {
         wishitems = items;
         var promises = [];
         items.forEach(function(item) {
@@ -33,7 +40,7 @@ var dataService = (function() {
           wishitems[i].author = authors[i];
         }
 
-        callback(null, wishitems);
+        callback(null, wishitems, wishItemSum);
 
       }, function(err) {
         onError(err);
@@ -60,13 +67,30 @@ var dataService = (function() {
       wish.save(item).then(function(item) {
         callback(null, item);
       }, function(err) {
-        alert("Error: " + error.code + " " + error.message);
+        onError(err);
         callback(err);
       });
     },
 
-    voteUpItem: function(id, callback) {
-      callback();
+    updateWishItemDescription: function(item, description, callback) {
+      item.save({ description: description })
+      .then(function() {
+        callback();
+      }, function(err) {
+        onError(err);
+        callback(err);
+      });
+    },
+
+    voteUpItem: function(item, callback) {
+      item.increment('voteup');
+      item.save()
+      .then(function() {
+        callback();
+      }, function(err) {
+        onError(err);
+        callback(err);
+      });
     },
 
     register: function(email, password, callback) {
