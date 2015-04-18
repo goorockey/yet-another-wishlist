@@ -10,7 +10,6 @@ var dataService = (function() {
 
   var Wish = AV.Object.extend("Wish");
   var Vote = AV.Object.extend("Vote");
-  var Comment = AV.Object.extend("Comment");
 
   var getUser = function() {
     return AV.User.current();
