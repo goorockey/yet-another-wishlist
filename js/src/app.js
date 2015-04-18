@@ -310,9 +310,8 @@ var EditWishDialog = React.createClass({
     React.findDOMNode(this.refs.description).value = '';
     $('#dlg-edit-wish').modal('hide');
   },
-  handleChangeDescription: function() {
-    var description = React.findDOMNode(this.refs.description).value.trim();
-    this.setState({description: description});
+  handleChangeDescription: function(event) {
+    this.setState({description: event.target.value});
   },
   render: function() {
     return (
