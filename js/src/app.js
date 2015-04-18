@@ -76,6 +76,7 @@ var WishList = React.createClass({
 
 var NavBar = React.createClass({
   render: function() {
+    var user = dataService.getUser();
     return (
       <nav className="navbar navbar-default">
         <div className="container-fluid">
@@ -86,7 +87,7 @@ var NavBar = React.createClass({
           </div>
           <ul className="nav navbar-nav navbar-right">
           {
-            dataService.getUser() ?
+            user ?
             [ <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button></li>
             , <li><button type="button" className="btn btn-primary" onClick={this.props.onLogout}>Logout</button></li>
             , <li><div id="box-user"><i className="mdi-social-person"></i><span>{user.getUsername()}</span></div></li> ] :

@@ -76,6 +76,7 @@ var WishList = React.createClass({displayName: "WishList",
 
 var NavBar = React.createClass({displayName: "NavBar",
   render: function() {
+    var user = dataService.getUser();
     return (
       React.createElement("nav", {className: "navbar navbar-default"}, 
         React.createElement("div", {className: "container-fluid"}, 
@@ -86,7 +87,7 @@ var NavBar = React.createClass({displayName: "NavBar",
           ), 
           React.createElement("ul", {className: "nav navbar-nav navbar-right"}, 
           
-            dataService.getUser() ?
+            user ?
             [ React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-new-wish"}, "New Wish"))
             , React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", onClick: this.props.onLogout}, "Logout"))
             , React.createElement("li", null, React.createElement("div", {id: "box-user"}, React.createElement("i", {className: "mdi-social-person"}), React.createElement("span", null, user.getUsername()))) ] :
