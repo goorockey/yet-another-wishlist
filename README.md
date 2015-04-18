@@ -1,5 +1,5 @@
 # yet-another-wishlist
-Website for sharing your app or website wishlist (http://www.goorockey.com/yet-another-wishlist)
+Website for sharing your wish (http://www.goorockey.com/yet-another-wishlist)
 
 # Dependencies
 - [ReatJS](http://facebook.github.io/react/)
