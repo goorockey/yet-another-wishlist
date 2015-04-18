@@ -7,6 +7,10 @@
   margin-right: 30px;
 }
 
+#box-user i {
+  vertical-align: middle;
+}
+
 .wish-item {
   margin-left: 0px;
   margin-right: 0px;

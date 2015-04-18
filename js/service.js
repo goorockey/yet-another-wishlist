@@ -24,8 +24,9 @@ var dataService = (function() {
 
       query.skip(itemPerPage * page)
       .limit(itemPerPage + 1)
-      .descending("createdAt")
-      .find()
+      .descending("voteup")
+      .addDescending("createdAt");
+      query.find()
       .then(function(items) {
         if (items.length > itemPerPage) {
           hasMore = true;
