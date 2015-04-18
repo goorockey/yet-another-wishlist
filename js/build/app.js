@@ -23,6 +23,7 @@ var WishItem = React.createClass({displayName: "WishItem",
   },
   render: function() {
     var isAuthor = dataService.getUser() && (this.props.item.author.getUsername() === dataService.getUser().getUsername());
+
     return (
       React.createElement("div", {className: "well wish-item row"}, 
         React.createElement("div", {className: "col-md-1 wish-item-voteup"}, 
@@ -45,8 +46,11 @@ var WishItem = React.createClass({displayName: "WishItem",
             React.createElement("span", {className: "text-muted"}, this.props.item.author.getUsername())
           ), 
           React.createElement("div", null, 
-             !isAuthor ? null : React.createElement("a", {className: "btn btn-flat mdi-content-create btn-edit-wish", onClick: this.props.onEditWish.bind(null, this.props.item)}), 
-             !isAuthor ? null : React.createElement("a", {className: "btn btn-flat mdi-content-clear btn-del-wish", onClick: this.props.onDelWish.bind(null, this.props.item)})
+            
+              !isAuthor ? null :
+              [ React.createElement("a", {className: "btn btn-flat mdi-content-create btn-edit-wish", onClick: this.props.onEditWish.bind(null, this.props.item)})
+              , React.createElement("a", {className: "btn btn-flat mdi-content-clear btn-del-wish", onClick: this.props.onDelWish.bind(null, this.props.item)}) ]
+            
           )
         )
       )
@@ -72,7 +76,6 @@ var WishList = React.createClass({displayName: "WishList",
 
 var NavBar = React.createClass({displayName: "NavBar",
   render: function() {
-    var user = dataService.getUser();
     return (
       React.createElement("nav", {className: "navbar navbar-default"}, 
         React.createElement("div", {className: "container-fluid"}, 
@@ -82,11 +85,14 @@ var NavBar = React.createClass({displayName: "NavBar",
             )
           ), 
           React.createElement("ul", {className: "nav navbar-nav navbar-right"}, 
-           user ? null : React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-register"}, "Register")), 
-           user ? null : React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-login"}, "Login")), 
-           !user ? null : React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-new-wish"}, "New Wish")), 
-           !user ? null : React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", onClick: this.props.onLogout}, "Logout")), 
-           !user ? null : React.createElement("li", null, React.createElement("div", {id: "box-user"}, React.createElement("i", {className: "mdi-social-person"}), React.createElement("span", null, user.getUsername())))
+          
+            dataService.getUser() ?
+            [ React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-new-wish"}, "New Wish"))
+            , React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", onClick: this.props.onLogout}, "Logout"))
+            , React.createElement("li", null, React.createElement("div", {id: "box-user"}, React.createElement("i", {className: "mdi-social-person"}), React.createElement("span", null, user.getUsername()))) ] :
+            [ React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-register"}, "Register"))
+            , React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-login"}, "Login")) ]
+          
           )
         )
       )

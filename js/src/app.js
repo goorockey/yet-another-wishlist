@@ -23,6 +23,7 @@ var WishItem = React.createClass({
   },
   render: function() {
     var isAuthor = dataService.getUser() && (this.props.item.author.getUsername() === dataService.getUser().getUsername());
+
     return (
       <div className="well wish-item row">
         <div className="col-md-1 wish-item-voteup">
@@ -45,8 +46,11 @@ var WishItem = React.createClass({
             <span className="text-muted">{this.props.item.author.getUsername()}</span>
           </div>
           <div>
-            { !isAuthor ? null : <a className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.props.onEditWish.bind(null, this.props.item)}></a> }
-            { !isAuthor ? null : <a className="btn btn-flat mdi-content-clear btn-del-wish" onClick={this.props.onDelWish.bind(null, this.props.item)}></a> }
+            {
+              !isAuthor ? null :
+              [ <a className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.props.onEditWish.bind(null, this.props.item)}></a>
+              , <a className="btn btn-flat mdi-content-clear btn-del-wish" onClick={this.props.onDelWish.bind(null, this.props.item)}></a> ]
+            }
           </div>
         </div>
       </div>
@@ -72,7 +76,6 @@ var WishList = React.createClass({
 
 var NavBar = React.createClass({
   render: function() {
-    var user = dataService.getUser();
     return (
       <nav className="navbar navbar-default">
         <div className="container-fluid">
@@ -82,11 +85,14 @@ var NavBar = React.createClass({
             </a>
           </div>
           <ul className="nav navbar-nav navbar-right">
-          { user ? null : <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-register">Register</button></li> }
-          { user ? null : <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-login">Login</button></li> }
-          { !user ? null : <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button></li> }
-          { !user ? null : <li><button type="button" className="btn btn-primary" onClick={this.props.onLogout}>Logout</button></li> }
-          { !user ? null : <li><div id="box-user"><i className="mdi-social-person"></i><span>{user.getUsername()}</span></div></li> }
+          {
+            dataService.getUser() ?
+            [ <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button></li>
+            , <li><button type="button" className="btn btn-primary" onClick={this.props.onLogout}>Logout</button></li>
+            , <li><div id="box-user"><i className="mdi-social-person"></i><span>{user.getUsername()}</span></div></li> ] :
+            [ <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-register">Register</button></li>
+            , <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-login">Login</button></li> ]
+          }
           </ul>
         </div>
       </nav>
