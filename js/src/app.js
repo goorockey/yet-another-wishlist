@@ -48,8 +48,8 @@ var WishItem = React.createClass({
           <div>
             {
               !isAuthor ? null :
-              [ <a className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.props.onEditWish.bind(null, this.props.item)}></a>
-              , <a className="btn btn-flat mdi-content-clear btn-del-wish" onClick={this.props.onDelWish.bind(null, this.props.item)}></a> ]
+              [ <a key="btn-edit-wish" className="btn btn-flat mdi-content-create btn-edit-wish" onClick={this.props.onEditWish.bind(null, this.props.item)}></a>
+              , <a key="btn-del-wish" className="btn btn-flat mdi-content-clear btn-del-wish" onClick={this.props.onDelWish.bind(null, this.props.item)}></a> ]
             }
           </div>
         </div>
@@ -88,11 +88,11 @@ var NavBar = React.createClass({
           <ul className="nav navbar-nav navbar-right">
           {
             user ?
-            [ <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button></li>
-            , <li><button type="button" className="btn btn-primary" onClick={this.props.onLogout}>Logout</button></li>
-            , <li><div id="box-user"><i className="mdi-social-person"></i><span>{user.getUsername()}</span></div></li> ] :
-            [ <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-register">Register</button></li>
-            , <li><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-login">Login</button></li> ]
+            [ <li key="btn-new-wish" ><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-new-wish">New Wish</button></li>
+            , <li key="btn-logout" ><button type="button" className="btn btn-primary" onClick={this.props.onLogout}>Logout</button></li>
+            , <li key="box-user" ><div id="box-user"><i className="mdi-social-person"></i><span>{user.getUsername()}</span></div></li> ] :
+            [ <li key="btn-register" ><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-register">Register</button></li>
+            , <li key="btn-login" ><button type="button" className="btn btn-primary" data-toggle="modal" data-target="#dlg-login">Login</button></li> ]
           }
           </ul>
         </div>
@@ -288,14 +288,13 @@ var NewWishDialog = React.createClass({
 var EditWishDialog = React.createClass({
   getInitialState: function() {
     return {
-      item: null,
       description: '',
     };
   },
   handleSubmit: function(e) {
     e.preventDefault();
 
-    if (!dataService.getUser() || !this.state.item) {
+    if (!dataService.getUser() || !this.props.item) {
       $('#dlg-edit-wish').modal('hide');
       return;
     }
@@ -306,7 +305,7 @@ var EditWishDialog = React.createClass({
       return;
     }
 
-    dataService.updateWishItem(this.state.item, description, function(err) {
+    dataService.updateWishItem(this.props.item, description, function(err) {
       if (err) {
         return;
       }
@@ -346,25 +345,20 @@ var EditWishDialog = React.createClass({
 });
 
 var DelWishDialog = React.createClass({
-  getInitialState: function() {
-    return {
-      item: null
-    };
-  },
   handleSubmit: function(e) {
     e.preventDefault();
 
-    if (!dataService.getUser() || !this.state.item) {
+    if (!dataService.getUser() || !this.props.item) {
       $('#dlg-del-wish').modal('hide');
       return;
     }
 
-    dataService.deleteWishItem(this.state.item, function(err) {
+    dataService.deleteWishItem(this.props.item, function(err) {
       if (err) {
         return;
       }
 
-      this.props.onDelWish(this.state.item);
+      this.props.onDelWish(this.props.item);
     }.bind(this));
 
     $('#dlg-del-wish').modal('hide');
@@ -408,6 +402,7 @@ var App = React.createClass({
       wishlist: [],
       page: 0,
       hasMore: true,
+      targetItem: null,
     }
   },
   componentDidMount: function() {
@@ -433,25 +428,31 @@ var App = React.createClass({
     this.setState({ wishlist: [item].concat(this.state.wishlist) });
   },
   handleEditWish: function(item) {
+    this.setState({ targetItem: item });
+
     this.refs.dlg_edit_wish.setState({
-      item: item,
       description: item.get('description'),
     });
 
     var dlg = React.findDOMNode(this.refs.dlg_edit_wish);
     $(dlg).modal('show');
   },
+  afterEditWish: function() {
+    this.setState({ targetItem: null });
+  },
   handleDelWish: function(item) {
-    this.refs.dlg_del_wish.setState({ item: item });
+    this.setState({ targetItem: item });
+
     var dlg = React.findDOMNode(this.refs.dlg_del_wish);
     $(dlg).modal('show');
   },
-  doDelWish: function(item) {
-    var index = this.state.wishlist.indexOf(item);
+  afterDelWish: function() {
+    var index = this.state.wishlist.indexOf(this.state.targetItem);
     if (index > -1) {
       this.state.wishlist.splice(index, 1);
       this.forceUpdate();
     }
+    this.setState({ targetItem: null });
   },
   handleGetMore: function() {
     this.setState({ page: this.state.page + 1 }, this.getWishItems);
@@ -471,8 +472,8 @@ var App = React.createClass({
         <RegisterDialog onRegister={this.forceUpdate.bind(this)} />
         <LoginDialog onLogin={this.forceUpdate.bind(this)} />
         <NewWishDialog onNewWish={this.handleNewWish} />
-        <EditWishDialog ref="dlg_edit_wish" onEditWish={this.forceUpdate.bind(this)} />
-        <DelWishDialog ref="dlg_del_wish" onDelWish={this.doDelWish} />
+        <EditWishDialog ref="dlg_edit_wish" onEditWish={this.afterEditWish} item={this.state.targetItem} />
+        <DelWishDialog ref="dlg_del_wish" onDelWish={this.afterDelWish} item={this.state.targetItem} />
       </div>
     );
   },

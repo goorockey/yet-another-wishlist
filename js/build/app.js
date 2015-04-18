@@ -48,8 +48,8 @@ var WishItem = React.createClass({displayName: "WishItem",
           React.createElement("div", null, 
             
               !isAuthor ? null :
-              [ React.createElement("a", {className: "btn btn-flat mdi-content-create btn-edit-wish", onClick: this.props.onEditWish.bind(null, this.props.item)})
-              , React.createElement("a", {className: "btn btn-flat mdi-content-clear btn-del-wish", onClick: this.props.onDelWish.bind(null, this.props.item)}) ]
+              [ React.createElement("a", {key: "btn-edit-wish", className: "btn btn-flat mdi-content-create btn-edit-wish", onClick: this.props.onEditWish.bind(null, this.props.item)})
+              , React.createElement("a", {key: "btn-del-wish", className: "btn btn-flat mdi-content-clear btn-del-wish", onClick: this.props.onDelWish.bind(null, this.props.item)}) ]
             
           )
         )
@@ -88,11 +88,11 @@ var NavBar = React.createClass({displayName: "NavBar",
           React.createElement("ul", {className: "nav navbar-nav navbar-right"}, 
           
             user ?
-            [ React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-new-wish"}, "New Wish"))
-            , React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", onClick: this.props.onLogout}, "Logout"))
-            , React.createElement("li", null, React.createElement("div", {id: "box-user"}, React.createElement("i", {className: "mdi-social-person"}), React.createElement("span", null, user.getUsername()))) ] :
-            [ React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-register"}, "Register"))
-            , React.createElement("li", null, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-login"}, "Login")) ]
+            [ React.createElement("li", {key: "btn-new-wish"}, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-new-wish"}, "New Wish"))
+            , React.createElement("li", {key: "btn-logout"}, React.createElement("button", {type: "button", className: "btn btn-primary", onClick: this.props.onLogout}, "Logout"))
+            , React.createElement("li", {key: "box-user"}, React.createElement("div", {id: "box-user"}, React.createElement("i", {className: "mdi-social-person"}), React.createElement("span", null, user.getUsername()))) ] :
+            [ React.createElement("li", {key: "btn-register"}, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-register"}, "Register"))
+            , React.createElement("li", {key: "btn-login"}, React.createElement("button", {type: "button", className: "btn btn-primary", "data-toggle": "modal", "data-target": "#dlg-login"}, "Login")) ]
           
           )
         )
@@ -288,14 +288,13 @@ var NewWishDialog = React.createClass({displayName: "NewWishDialog",
 var EditWishDialog = React.createClass({displayName: "EditWishDialog",
   getInitialState: function() {
     return {
-      item: null,
       description: '',
     };
   },
   handleSubmit: function(e) {
     e.preventDefault();
 
-    if (!dataService.getUser() || !this.state.item) {
+    if (!dataService.getUser() || !this.props.item) {
       $('#dlg-edit-wish').modal('hide');
       return;
     }
@@ -306,7 +305,7 @@ var EditWishDialog = React.createClass({displayName: "EditWishDialog",
       return;
     }
 
-    dataService.updateWishItem(this.state.item, description, function(err) {
+    dataService.updateWishItem(this.props.item, description, function(err) {
       if (err) {
         return;
       }
@@ -346,25 +345,20 @@ var EditWishDialog = React.createClass({displayName: "EditWishDialog",
 });
 
 var DelWishDialog = React.createClass({displayName: "DelWishDialog",
-  getInitialState: function() {
-    return {
-      item: null
-    };
-  },
   handleSubmit: function(e) {
     e.preventDefault();
 
-    if (!dataService.getUser() || !this.state.item) {
+    if (!dataService.getUser() || !this.props.item) {
       $('#dlg-del-wish').modal('hide');
       return;
     }
 
-    dataService.deleteWishItem(this.state.item, function(err) {
+    dataService.deleteWishItem(this.props.item, function(err) {
       if (err) {
         return;
       }
 
-      this.props.onDelWish(this.state.item);
+      this.props.onDelWish(this.props.item);
     }.bind(this));
 
     $('#dlg-del-wish').modal('hide');
@@ -408,6 +402,7 @@ var App = React.createClass({displayName: "App",
       wishlist: [],
       page: 0,
       hasMore: true,
+      targetItem: null,
     }
   },
   componentDidMount: function() {
@@ -433,25 +428,31 @@ var App = React.createClass({displayName: "App",
     this.setState({ wishlist: [item].concat(this.state.wishlist) });
   },
   handleEditWish: function(item) {
+    this.setState({ targetItem: item });
+
     this.refs.dlg_edit_wish.setState({
-      item: item,
       description: item.get('description'),
     });
 
     var dlg = React.findDOMNode(this.refs.dlg_edit_wish);
     $(dlg).modal('show');
   },
+  afterEditWish: function() {
+    this.setState({ targetItem: null });
+  },
   handleDelWish: function(item) {
-    this.refs.dlg_del_wish.setState({ item: item });
+    this.setState({ targetItem: item });
+
     var dlg = React.findDOMNode(this.refs.dlg_del_wish);
     $(dlg).modal('show');
   },
-  doDelWish: function(item) {
-    var index = this.state.wishlist.indexOf(item);
+  afterDelWish: function() {
+    var index = this.state.wishlist.indexOf(this.state.targetItem);
     if (index > -1) {
       this.state.wishlist.splice(index, 1);
       this.forceUpdate();
     }
+    this.setState({ targetItem: null });
   },
   handleGetMore: function() {
     this.setState({ page: this.state.page + 1 }, this.getWishItems);
@@ -471,8 +472,8 @@ var App = React.createClass({displayName: "App",
         React.createElement(RegisterDialog, {onRegister: this.forceUpdate.bind(this)}), 
         React.createElement(LoginDialog, {onLogin: this.forceUpdate.bind(this)}), 
         React.createElement(NewWishDialog, {onNewWish: this.handleNewWish}), 
-        React.createElement(EditWishDialog, {ref: "dlg_edit_wish", onEditWish: this.forceUpdate.bind(this)}), 
-        React.createElement(DelWishDialog, {ref: "dlg_del_wish", onDelWish: this.doDelWish})
+        React.createElement(EditWishDialog, {ref: "dlg_edit_wish", onEditWish: this.afterEditWish, item: this.state.targetItem}), 
+        React.createElement(DelWishDialog, {ref: "dlg_del_wish", onDelWish: this.afterDelWish, item: this.state.targetItem})
       )
     );
   },
