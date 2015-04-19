@@ -291,6 +291,9 @@ var EditWishDialog = React.createClass({displayName: "EditWishDialog",
       description: '',
     };
   },
+  componentWillReceiveProps: function(nextProps) {
+    this.setState({ description: nextProps.item ? nextProps.item.get("description") : '' });
+  },
   handleSubmit: function(e) {
     e.preventDefault();
 
@@ -317,7 +320,7 @@ var EditWishDialog = React.createClass({displayName: "EditWishDialog",
     $('#dlg-edit-wish').modal('hide');
   },
   handleChangeDescription: function(event) {
-    this.setState({description: event.target.value});
+    this.setState({ description: event.target.value });
   },
   render: function() {
     return (
@@ -405,9 +408,11 @@ var App = React.createClass({displayName: "App",
       targetItem: null,
     }
   },
+  componentWillMount: function() {
+    this.getWishItems();
+  },
   componentDidMount: function() {
     $.material.init();
-    this.getWishItems();
   },
   getWishItems: function() {
     dataService.getWishItems(this.state.page, function(err, items, hasMore) {
@@ -429,10 +434,6 @@ var App = React.createClass({displayName: "App",
   },
   handleEditWish: function(item) {
     this.setState({ targetItem: item });
-
-    this.refs.dlg_edit_wish.setState({
-      description: item.get('description'),
-    });
 
     var dlg = React.findDOMNode(this.refs.dlg_edit_wish);
     $(dlg).modal('show');
